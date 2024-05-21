@@ -1,0 +1,11 @@
+.editorconfig
+.env.example
+.env.development.example
+.env.production.example
+.git
+.gitattributes
+.gitignore
+.gitlab-ci.yml
+Dockerfile
+dist
+node_modules

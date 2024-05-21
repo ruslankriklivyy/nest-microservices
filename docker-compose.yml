@@ -1,0 +1,67 @@
+version: '3.9'
+services:
+  zookeeper:
+    image: 'docker.io/bitnami/zookeeper:3-debian-10'
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - app-network
+  nats:
+    image: nats
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    networks:
+      - app-network
+    depends_on:
+      - zookeeper
+  users-db:
+    image: postgres:16
+    container_name: users-postgres-db
+    env_file:
+      - ./users/.env
+    networks:
+      - app-network
+    volumes:
+      - users_postgres_data:/var/lib/postgresql/data
+    expose:
+      - '5432'
+  tokens-db:
+    image: postgres:16
+    container_name: tokens-postgres-db
+    env_file:
+      - ./auth/.env
+    networks:
+      - app-network
+    volumes:
+      - tokens_postgres_data:/var/lib/postgresql/data
+    expose:
+      - '5432'
+  users-api:
+    container_name: users-api
+    depends_on:
+      - users-db
+      - nats
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+  auth-api:
+    container_name: auth-api
+    depends_on:
+      - tokens-db
+      - nats
+    ports:
+      - "3001:3001"
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
+volumes:
+  tokens_postgres_data:
+    driver: local
+  users_postgres_data:
+    driver: local
