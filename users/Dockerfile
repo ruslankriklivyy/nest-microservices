@@ -1,5 +1,5 @@
 # BUILD FOR LOCAL DEVELOPMENT
-FROM node:20 as development
+FROM node:20.14 as development
 
 USER node:node
 WORKDIR /app
@@ -17,7 +17,7 @@ RUN chmod +x dev-entrypoint.sh
 EXPOSE $PORT
 
 # PRODUCTION
-FROM node:20 as production
+FROM node:20.14 as production
 
 ENV NODE_ENV PROD
 

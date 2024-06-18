@@ -1,13 +1,5 @@
 version: '3.9'
 services:
-  zookeeper:
-    image: 'docker.io/bitnami/zookeeper:3-debian-10'
-    ports:
-      - "2181:2181"
-    environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
-    networks:
-      - app-network
   nats:
     image: nats
     ports:
@@ -15,8 +7,6 @@ services:
       - "9093:9093"
     networks:
       - app-network
-    depends_on:
-      - zookeeper
   users-db:
     image: postgres:16
     container_name: users-postgres-db

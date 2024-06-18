@@ -7,6 +7,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PostgresErrorCodes } from '../../enums/database/PostgresErrorCodes.enum';
 import { SuccessResponseDto } from '../../shared/dto/success-response.dto';
 import { FailureResponseDto } from '../../shared/dto/failure-response.dto';
+import { User } from './entities/user.entity';
 
 @Controller()
 export class UsersController {
@@ -16,7 +17,7 @@ export class UsersController {
   async create(@Payload() createUserDto: CreateUserDto) {
     try {
       const newUser = await this.usersService.create(createUserDto);
-      return new SuccessResponseDto({
+      return new SuccessResponseDto<User>({
         status: HttpStatus.OK,
         data: newUser,
         success: true,
@@ -33,35 +34,106 @@ export class UsersController {
 
       return new FailureResponseDto({
         success: false,
-        message: 'Something went wrong',
+        message: 'Something went wrong.',
         status: HttpStatus.BAD_REQUEST,
       });
     }
   }
 
   @MessagePattern('find_users')
-  findAll() {
-    return this.usersService.findAll();
+  async findAll() {
+    try {
+      const users = await this.usersService.findAll();
+      return new SuccessResponseDto<User[]>({
+        status: HttpStatus.OK,
+        data: users,
+        success: true,
+        message: 'Fetch users successfully.',
+      });
+    } catch (error) {
+      return new FailureResponseDto({
+        success: false,
+        message: 'Something went wrong.',
+        status: HttpStatus.BAD_REQUEST,
+      });
+    }
   }
 
   @MessagePattern('find_user')
-  findOne(@Payload() id: number) {
-    return this.usersService.findOne(id);
+  async findOne(@Payload() id: number) {
+    try {
+      const user = await this.usersService.findOne(id);
+      return new SuccessResponseDto<User>({
+        status: HttpStatus.OK,
+        data: user,
+        success: true,
+        message: 'Fetch user successfully',
+      });
+    } catch (error) {
+      return new FailureResponseDto({
+        success: false,
+        message: 'Something went wrong.',
+        status: HttpStatus.BAD_REQUEST,
+      });
+    }
   }
 
   @MessagePattern('find_user_by_email')
   async findByEmail(@Payload() email: string) {
-    const user = await this.usersService.findByEmail(email);
-    return JSON.stringify(user);
+    try {
+      const userByEmail = await this.usersService.findByEmail(email);
+      return new SuccessResponseDto<User>({
+        status: HttpStatus.OK,
+        data: userByEmail,
+        success: true,
+        message: 'Fetch user by email successfully',
+      });
+    } catch (error) {
+      return new FailureResponseDto({
+        success: false,
+        message: 'Something went wrong.',
+        status: HttpStatus.BAD_REQUEST,
+      });
+    }
   }
 
   @MessagePattern('update_user')
-  update(@Payload() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(updateUserDto.id, updateUserDto);
+  async update(@Payload() updateUserDto: UpdateUserDto) {
+    try {
+      const updatedUser = await this.usersService.update(
+        updateUserDto.id,
+        updateUserDto,
+      );
+      return new SuccessResponseDto<User>({
+        status: HttpStatus.OK,
+        data: updatedUser,
+        success: true,
+        message: 'Updated user successfully',
+      });
+    } catch (error) {
+      return new FailureResponseDto({
+        success: false,
+        message: 'Something went wrong.',
+        status: HttpStatus.BAD_REQUEST,
+      });
+    }
   }
 
   @MessagePattern('remove_user')
-  remove(@Payload() id: number) {
-    return this.usersService.remove(id);
+  async remove(@Payload() id: number) {
+    try {
+      await this.usersService.remove(id);
+      return new SuccessResponseDto({
+        status: HttpStatus.OK,
+        success: true,
+        message: 'User removed',
+      });
+    } catch (error) {
+      return new FailureResponseDto({
+        success: false,
+        message: 'Something went wrong.',
+        status: HttpStatus.BAD_REQUEST,
+      });
+    }
   }
 }

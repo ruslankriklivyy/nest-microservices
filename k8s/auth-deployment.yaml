@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-config
+  namespace: microservices
+data:
+  DATABASE_URL: "postgres://tokens:password@postgres-auth:5432/tokens"
+  NATS_URL: "nats://nats:4222"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+  namespace: microservices
+spec:
+  ports:
+    - port: 3000
+  selector:
+    app: auth
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  namespace: microservices
+spec:
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: your-docker-repo/auth:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: auth-config
